@@ -1,5 +1,5 @@
-// Spaceship prefab
-class Spaceship extends Phaser.GameObjects.Sprite {
+// Ghost prefab
+class Ghost extends Phaser.GameObjects.Sprite {
     constructor(scene, x, y, texture, frame, pointValue) {
         super(scene, x, y, texture, frame);
 
@@ -9,7 +9,7 @@ class Spaceship extends Phaser.GameObjects.Sprite {
 
     update() {
 // move spacehsip left
-        this.x -= game.settings.spaceshipSpeed;
+        this.x -= game.settings.ghostSpeed;
         // wraparound screen bounds
         if(this.x <= 0 - this.width){
             this.x = game.config.width;
