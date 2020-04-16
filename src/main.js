@@ -12,6 +12,6 @@ let keyF, keyLEFT, keyRIGHT;
 
 //define game settings
 game.settings = {
-    ghostSpeed: 3,
+    spaceshipSpeed: 3,
     gameTimer: 60000
 }
