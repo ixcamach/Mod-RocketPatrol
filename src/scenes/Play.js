@@ -8,7 +8,10 @@ class Play extends Phaser.Scene {
         this.load.image('cross', './assets/cross.png');
         this.load.image('ghost', './assets/ghost.png');
         this.load.image('sky', './assets/sky.png');
-        this.load.spritesheet('scatter', './assets/scatter.png', {frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 8});
+        this.load.image('spike', './assets/spike.png');
+        this.load.image('spike1.2', './assets/spike1.2.png');
+        // fix explosion
+        this.load.spritesheet('ash', './assets/ash.png', {frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 9});
     }
 
     create() {
@@ -16,19 +19,24 @@ class Play extends Phaser.Scene {
         this.sky = this.add.tileSprite(0, 0, 640, 480, 'sky').setOrigin(0, 0);
 
         // white rectangle borders
-        this.add.rectangle(5, 5, 630, 32, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(5, 443, 630, 32, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(5, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(603, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
+        //this.add.rectangle(5, 5, 630, 32, 0xFFFFFF).setOrigin(0, 0);
+        //this.add.rectangle(5, 443, 630, 32, 0xFFFFFF).setOrigin(0, 0);
+        //this.add.rectangle(5, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
+        //this.add.rectangle(603, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
+        this.add.image(320, 20, 'spike');
+        this.add.image(320, 462, 'spike');
+        this.add.image(620, 255, 'spike1.2');
+        this.add.image(20, 255, 'spike1.2');
+
 
         // green UI bckground
-        this.add.rectangle(37, 42, 566, 64, 0X00FF00).setOrigin(0, 0);
+        //this.add.rectangle(37, 42, 566, 64, 0XAFC3C3).setOrigin(0, 0);
 
         // add rocket(p1)
         this.p1Cross = new Cross(this, game.config.width/2, 431, 'cross').setScale(0.5, 0.5).setOrigin(0, 0.4);
 
         // add spaceships x3
-        this.ghost01 = new Ghost(this, game.config.width +192, 132, 'ghost', 0, 30).setOrigin(0, 0);
+        this.ghost01 = new Ghost(this, game.config.width +192, 150, 'ghost', 0, 30).setOrigin(0, 0);
         this.ghost02 = new Ghost(this, game.config.width +96, 196, 'ghost', 0, 20).setOrigin(0, 0);
         this.ghost03 = new Ghost(this, game.config.width, 260, 'ghost', 0, 10).setOrigin(0, 0);
 
@@ -39,8 +47,8 @@ class Play extends Phaser.Scene {
 
         // animation config
         this.anims.create({
-            key: 'scatter',
-            frames: this.anims.generateFrameNumbers('scatter', {start: 0, end: 8, first: 0}),
+            key: 'ash',
+            frames: this.anims.generateFrameNumbers('ash', {start: 0, end: 9, first: 0}),
             frameRate: 30
         });
 
@@ -48,13 +56,13 @@ class Play extends Phaser.Scene {
         this.p1Score = 0;
         //score display
         let scoreConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'SpookyBooah',
             fontSize: '28px',
-            backgroundColor: '#F3B141',
-            color: '#843605',
-            align: 'right',
+            //backgroundColor: '#F3B141',
+            color: '#FFFF00',
+            align: 'left',
             padding: {
-                top: 5,
+                top: 0,
                 bottom: 5,
             },
             fixedWidth: 100
@@ -66,11 +74,22 @@ class Play extends Phaser.Scene {
         
         //60 second play clock
         scoreConfig.fixedWidth = 0;
+
         this.clock = this.time.delayedCall(game.settings.gameTimer, () => { 
             this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 + 64, '(F)ire to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2 + 64, '(F) ire to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
             this.gameOver = true;
         }, null, this);
+
+        //display clock
+        {
+            console.log('create');
+            this.initialTime = game.settings.gameTimer/1000;
+        
+            text = this.add.text(32, 32, 'Countdown: ' + formatTime(this.initialTime));
+        
+            timedEvent = this.time.addEvent({ delay: 1000, callback: onEvent, callbackScope: this, loop: true});
+        }
 
     }
 
@@ -123,8 +142,8 @@ class Play extends Phaser.Scene {
         ghostScatter(ghost) {
             ghost.alpha = 0;     //temporarily hide ship
             //create explosion sprite at ship's position
-            let boom = this.add.sprite(ghost.x, ghost.y, 'scatter').setOrigin(0, 0);
-            boom.anims.play('scatter');     //play explode animation
+            let boom = this.add.sprite(ghost.x, ghost.y, 'ash').setOrigin(0, 0);
+            boom.anims.play('ash');     //play explode animation
             boom.on('animationcomplete', () => {        //callback after animation completes
                 ghost.reset();       //reset ship position
                 ghost.alpha = 1;     //make ship visible again
@@ -136,4 +155,28 @@ class Play extends Phaser.Scene {
 
             this.sound.play('sfx_explosion');
         }
+
 }
+        // display clock text
+        var text;
+        var timedEvent;
+        function formatTime(seconds){
+                //min
+                minutes = Math.floor(seconds/60);
+                //secs
+                partInSeconds = seconds%60;
+                //add left zeroes to secs
+                partInSeconds = partInSeconds.toString().padStart(2, '0');
+                //returns time
+                return `${minutes}:${partInSeconds}`;
+           
+        }
+        
+        function onEvent () {
+            if (!this.gameOver) {
+            this.initialTime -= 1; //one sec
+            text.setText('Countdown: ' + formatTime(this.initialTime));
+        } else {
+            this.clock = false;
+        }
+        }
