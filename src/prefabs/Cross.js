@@ -24,11 +24,11 @@ class Cross extends Phaser.GameObjects.Sprite {
             this.sfxCross.play();  //play sfx
         }
         // if fired, move up
-        if(this.isFiring && this.y >= 108) {
+        if(this.isFiring && this.y >= 30) {
             this.y -= 2;
         }
         // rest on miss
-        if(this.y <= 108) {
+        if(this.y <= 30) {
             this.isFiring = false;
             this.y = 431;
         }
