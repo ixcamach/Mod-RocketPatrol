@@ -8,16 +8,20 @@ class Play extends Phaser.Scene {
         
         this.load.image('cross', './assets/cross.png');
         this.load.image('ghost', './assets/ghost.png');
-        this.load.image('sky', './assets/sky.png');
+        this.load.image('sky1', './assets/sky1.png');
         this.load.image('spike', './assets/spike.png');
         this.load.image('spike1.2', './assets/spike1.2.png');
         // fix explosion
         this.load.spritesheet('ash', './assets/ash.png', {frameWidth: 64, frameHeight: 64, startFrame: 0, endFrame: 9});
+        this.load.audio('spook', './assets/spook.wav');
+
     }
 
     create() {
         //place tile sprite
-        this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
+
+        this.sky1 = this.add.tileSprite(0, 0, 640, 480, 'sky1').setOrigin(0, 0);
+ f044cae2d245f643e54e384f6f23c353af5ad37d
 
         // white rectangle borders
         //this.add.rectangle(5, 5, 630, 32, 0xFFFFFF).setOrigin(0, 0);
@@ -101,18 +105,27 @@ class Play extends Phaser.Scene {
             timedEvent = this.time.addEvent({ delay: 1000, callback: onEvent, callbackScope: this, loop: true});
         }
 
+        // background music
+        this.bgm = this.sound.add('spook', {mute: false, volume: 1, rate: 1, detune: 0, seek: 0, delay: 0});
+        this.bgm.loop = true;
+        this.bgm.play();
+
     }
 
     update() {
         // check key input for restart
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
             this.scene.restart(this.p1Score);
+            this.bgm.pause();
         }
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
             this.scene.start("menuScene");
+            this.bgm.stop();
         }
         // scroll starfield
-        this.starfield.tilePositionX -= 4;
+
+        this.sky1.tilePositionX -= 3;
+
 
         if (!this.gameOver) {
         //update rocket
